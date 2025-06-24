@@ -1,103 +1,116 @@
-import Image from "next/image";
+"use client";
+
+import { useActionState } from "react";
+import { submitPrompt } from "@/features/actions";
+import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
+function Typewriter({ text }: { text: string }) {
+  const [displayedText, setDisplayedText] = useState("");
+
+  useEffect(() => {
+    setDisplayedText("");
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < text.length) {
+        setDisplayedText((prev) => prev + text.charAt(i));
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 10);
+    return () => clearInterval(interval);
+  }, [text]);
+
+  return (
+    <div className="prose prose-invert prose-sm max-w-none">
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{displayedText}</ReactMarkdown>
+    </div>
+  );
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [state, formAction, isPending] = useActionState(submitPrompt, null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <main className="min-h-screen font-mono p-4 sm:p-6 lg:p-8 flex flex-col">
+      {/* Header */}
+      <header className="w-full flex justify-between items-center pb-4 border-b border-slate-800">
+        <h1 className="text-lg font-bold text-cyan-400 tracking-widest">
+          A.I. AGENT // PERSONAL ASSISTANT
+        </h1>
+        <div className="text-xs text-slate-500">
+          STATUS: <span className="text-green-400">ONLINE</span>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </header>
+
+      {/* Main content grid */}
+      <div className="flex-grow grid md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mt-4 min-h-0">
+        {/* Left Panel: Input */}
+        <div className="bg-slate-900/50 border border-slate-800 p-6 flex flex-col">
+          <h2 className="text-sm font-semibold text-slate-400 mb-4 tracking-wider">
+            [ PROMPT TERMINAL ]
+          </h2>
+          <form
+            action={formAction}
+            className="flex-grow flex flex-col space-y-4"
+          >
+            <div className="flex-grow">
+              <textarea
+                name="prompt"
+                placeholder="Enter your query..."
+                className="w-full h-full bg-transparent border border-slate-700 p-3 text-sm text-slate-200 focus:outline-none focus:border-cyan-400 resize-none"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-transparent border border-cyan-400 text-cyan-400 font-bold py-2 px-4 hover:bg-cyan-400 hover:text-black active:scale-[0.99] active:opacity-80 transition-all duration-200"
+              disabled={isPending}
+            >
+              {isPending ? "EXECUTING..." : "EXECUTE"}
+            </button>
+          </form>
+        </div>
+
+        {/* Right Panel: Output */}
+        <div className="bg-slate-900/50 border border-slate-800 p-6 flex flex-col">
+          <h2 className="text-sm font-semibold text-slate-400 mb-4 tracking-wider">
+            [ AGENT RESPONSE ]
+          </h2>
+          <div className="flex-grow bg-slate-950/50 p-4 border border-slate-800 text-sm max-h-[500px] overflow-y-auto">
+            {state?.error && (
+              <div className="text-red-400">
+                <p className="font-bold">[ ERROR ]</p>
+                <p>{state.error}</p>
+              </div>
+            )}
+
+            {state?.success && state.data && (
+              <div>
+                <p className="text-cyan-400 font-bold">[ RESPONSE DATA ]</p>
+                <Typewriter text={state.data} />
+              </div>
+            )}
+
+            {!state && !isPending && (
+              <p className="text-slate-600 animate-pulse">Awaiting input...</p>
+            )}
+
+            {isPending && (
+              <p className="text-slate-600 animate-pulse">
+                Awaiting response from agent...
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="w-full text-center text-xs text-slate-600 pt-4 mt-4 border-t border-slate-800">
+        <p>AGENT-ID: ALPHA-818-C // POWERED BY OPENAI</p>
       </footer>
-    </div>
+    </main>
   );
 }
